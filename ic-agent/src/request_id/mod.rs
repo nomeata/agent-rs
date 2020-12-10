@@ -7,7 +7,7 @@
 //! A single method is exported, to_request_id, which returns a RequestId
 //! (a 256 bits slice) or an error.
 use error::RequestIdFromStringError;
-use openssl::sha::Sha256;
+use sha2::{Sha256, Digest};
 use serde::{ser, Serialize, Serializer};
 use std::collections::BTreeMap;
 use std::iter::Extend;
@@ -146,7 +146,7 @@ impl RequestIdSerializer {
     /// it should not be a problem.
     pub fn finish(self) -> Result<RequestId, RequestIdError> {
         match self.element_encoder {
-            Some(Hasher::RequestId(hasher)) => Ok(RequestId(hasher.finish())),
+            Some(Hasher::RequestId(hasher)) => Ok(RequestId(hasher.finalize().into())),
             _ => Err(RequestIdError::EmptySerializer),
         }
     }
@@ -165,7 +165,7 @@ impl RequestIdSerializer {
 
         value.serialize(&mut *self)?;
         let result = match self.element_encoder.take() {
-            Some(Hasher::Value(hasher)) => Ok(hasher.finish()),
+            Some(Hasher::Value(hasher)) => Ok(hasher.finalize().into()),
             _ => Err(RequestIdError::InvalidState),
         };
         self.element_encoder = prev_encoder;
@@ -497,8 +497,8 @@ impl<'a> ser::SerializeSeq for &'a mut RequestIdSerializer {
         value.serialize(&mut **self)?;
 
         let value_encoder = self.element_encoder.take();
-        let hash = match value_encoder {
-            Some(Hasher::Value(hasher)) => Ok(hasher.finish()),
+        let hash : [u8;32] = match value_encoder {
+            Some(Hasher::Value(hasher)) => Ok(hasher.finalize().into()),
             _ => Err(RequestIdError::InvalidState),
         }?;
 

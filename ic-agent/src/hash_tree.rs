@@ -5,7 +5,9 @@
 //!       the Sha256Digest and use the same type in RequestId (they're interchangeable).
 //!
 //! cf https://docs.dfinity.systems/public/v/0.13.1/#_encoding_of_certificates
-use openssl::sha::Sha256;
+
+//use openssl::sha::Sha256;
+use sha2::{Sha256, Digest};
 use serde::{Deserialize, Serialize, Serializer};
 use std::convert::TryFrom;
 
@@ -258,7 +260,7 @@ impl HashTreeNode {
             }
         }
 
-        hasher.finish()
+        hasher.finalize().into()
     }
 
     /// Lookup a single label, returning a reference to the labeled [HashTreeNode] node if found.
