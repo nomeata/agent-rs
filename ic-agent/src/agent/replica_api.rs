@@ -6,10 +6,10 @@ use serde::{Deserialize, Serialize};
 #[serde(rename_all = "snake_case")]
 pub struct Envelope<T: Serialize> {
     pub content: T,
-    #[serde(with = "serde_bytes")]
-    pub sender_pubkey: Vec<u8>,
-    #[serde(with = "serde_bytes")]
-    pub sender_sig: Vec<u8>,
+    // #[serde(with = "serde_bytes")]
+    // pub sender_pubkey: Vec<u8>,
+    // #[serde(with = "serde_bytes")]
+    // pub sender_sig: Vec<u8>,
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]

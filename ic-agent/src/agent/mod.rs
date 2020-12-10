@@ -37,7 +37,7 @@ use std::convert::TryFrom;
 use std::sync::RwLock;
 use std::time::Duration;
 
-const IC_REQUEST_DOMAIN_SEPARATOR: &[u8; 11] = b"\x0Aic-request";
+// const IC_REQUEST_DOMAIN_SEPARATOR: &[u8; 11] = b"\x0Aic-request";
 const IC_STATE_ROOT_DOMAIN_SEPARATOR: &[u8; 14] = b"\x0Dic-state-root";
 
 /// A low level Agent to make calls to a Replica endpoint.
@@ -192,12 +192,12 @@ impl Agent {
             .as_nanos() as u64
     }
 
-    fn construct_message(&self, request_id: &RequestId) -> Vec<u8> {
-        let mut buf = vec![];
-        buf.extend_from_slice(IC_REQUEST_DOMAIN_SEPARATOR);
-        buf.extend_from_slice(request_id.as_slice());
-        buf
-    }
+    // fn construct_message(&self, request_id: &RequestId) -> Vec<u8> {
+    //     let mut buf = vec![];
+    //     buf.extend_from_slice(IC_REQUEST_DOMAIN_SEPARATOR);
+    //     buf.extend_from_slice(request_id.as_slice());
+    //     buf
+    // }
 
     async fn request(
         &self,
@@ -312,24 +312,24 @@ impl Agent {
     where
         A: serde::de::DeserializeOwned,
     {
-        let request_id = to_request_id(&request)?;
-        let sender = match &request {
-            SyncContent::QueryRequest { sender, .. } => sender,
-            SyncContent::ReadStateRequest { sender, .. } => sender,
-        };
-        let msg = self.construct_message(&request_id);
-        let signature = self
-            .identity
-            .sign(&msg, &sender)
-            .map_err(AgentError::SigningError)?;
+        //let request_id = to_request_id(&request)?;
+        // let sender = match &request {
+        //     SyncContent::QueryRequest { sender, .. } => sender,
+        //     SyncContent::ReadStateRequest { sender, .. } => sender,
+        // };
+        //let msg = self.construct_message(&request_id);
+        // let signature = self
+        //     .identity
+        //     .sign(&msg, &sender)
+        //     .map_err(AgentError::SigningError)?;
         let bytes = self
             .execute(
                 Method::POST,
                 "read",
                 Some(Envelope {
                     content: request,
-                    sender_pubkey: signature.public_key,
-                    sender_sig: signature.signature,
+                    // sender_pubkey: signature.public_key,
+                    // sender_sig: signature.signature,
                 }),
             )
             .await?;
@@ -339,22 +339,22 @@ impl Agent {
 
     async fn submit_endpoint(&self, request: AsyncContent) -> Result<RequestId, AgentError> {
         let request_id = to_request_id(&request)?;
-        let sender = match request.clone() {
-            AsyncContent::CallRequest { sender, .. } => sender,
-        };
-        let msg = self.construct_message(&request_id);
-        let signature = self
-            .identity
-            .sign(&msg, &sender)
-            .map_err(AgentError::SigningError)?;
+        // let sender = match request.clone() {
+        //     AsyncContent::CallRequest { sender, .. } => sender,
+        // };
+        // let msg = self.construct_message(&request_id);
+        // let signature = self
+        //     .identity
+        //     .sign(&msg, &sender)
+        //     .map_err(AgentError::SigningError)?;
         let _ = self
             .execute(
                 Method::POST,
                 "submit",
                 Some(Envelope {
                     content: request,
-                    sender_pubkey: signature.public_key,
-                    sender_sig: signature.signature,
+                    // sender_pubkey: signature.public_key,
+                    // sender_sig: signature.signature,
                 }),
             )
             .await?;
